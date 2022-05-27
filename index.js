@@ -138,7 +138,7 @@ function drawable_canvas(w,h){
     }
   })
   function push_wip(){
-    let p = FindContours.approxPolyDP(wip,0.5);
+    let p = approxPolyDP(wip,0.5);
     if (p.length > 1){
       drawing.push(p); 
     }
