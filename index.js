@@ -247,6 +247,7 @@ function draw_quad(ctx,P){
   ctx.lineTo(...P[0]);
   ctx.stroke();
   draw_circle(ctx,...P[0],10);ctx.stroke();
+  draw_circle(ctx,...P[0],5);ctx.stroke();
   draw_circle(ctx,...P[1],10);ctx.stroke();
   draw_circle(ctx,...P[2],10);ctx.stroke();
   draw_circle(ctx,...P[3],10);ctx.stroke(); 
@@ -313,9 +314,8 @@ let cnv1 = drawable_canvas(W,H);
 let ctx1 = cnv1.getContext('2d');
 
 
-
 cnv0.Q = [
-  [0,0],[400,0],[400,400],[0,400],
+  [0,400],[400,400],[400,0],[0,0],
 ]
 
 cnv1.Q = [
@@ -493,9 +493,41 @@ let gcode_settings = {
 }
 
 
-// add_button("download gcode",function(){
+document.body.appendChild(document.createElement("br"));
 
-// })
+/*
+import asyncio
+from websockets import serve
+async def echo(websocket):
+    async for message in websocket:
+        print(message)
+        if (message != "done"):
+            await websocket.send("ok")
+async def main():
+    async with serve(echo, "localhost", 8765):
+        await asyncio.Future()
+asyncio.run(main())
+*/
+add_input("websocket",function(s){
+  let gcode_lines = document.getElementById("tc1").getElementsByTagName("textarea")[0].value.split("\n").filter(x=>x.length).filter(x=>x.startsWith("G01")).map(x=>x.replace(/F.*/g,"")+"F8");
+  console.log(s,gcode_lines);
+  let idx = 0;
+  let ws = new WebSocket(s);
+  ws.onmessage = function(event){
+    if (event.data == "ok"){
+      if (idx < gcode_lines.length){
+        console.log("sending",idx,"/",gcode_lines.length,gcode_lines[idx])
+        ws.send(gcode_lines[idx]);
+        idx++;
+      }else{
+        ws.send("done");
+      }
+    }
+  }
+  ws.onopen = function(){
+    ws.send("hi");
+  }
+},'ws://localhost:8765');
 
 document.body.appendChild(document.createElement("br"));
 
